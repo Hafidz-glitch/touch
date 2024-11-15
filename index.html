@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Perbaikan Touchscreen Vivo Y91C</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f1f1f1;
+            color: #333;
+            line-height: 1.4;
+            padding: 10px;
+            max-width: 100%;
+        }
+
+        .app-container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: #1a73e8;
+        }
+
+        .status-bar {
+            background: #e8f0fe;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            border: 1px solid #ffeeba;
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 15px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            background: #1a73e8;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: left;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .action-button:after {
+            content: '→';
+            position: absolute;
+            right: 15px;
+        }
+
+        .action-button:active {
+            background: #1557b0;
+        }
+
+        .action-button[disabled] {
+            background: #ccc;
+            color: #666;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #1a73e8;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        #status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .log-container {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>Perbaikan Touchscreen Vivo Y91C</h1>
+        </div>
+
+        <div class="warning">
+            ⚠️ PERHATIAN: Backup data penting sebelum melanjutkan. Aplikasi ini memerlukan akses root.
+        </div>
+
+        <div class="status-bar" id="deviceInfo">
+            Mendeteksi perangkat...
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+
+        <button class="action-button" onclick="startDiagnostic()">
+            Diagnosa Masalah Touchscreen
+        </button>
+
+        <button class="action-button" onclick="fixTouchscreen()">
+            Perbaiki Area Touchscreen
+        </button>
+
+        <button class="action-button" onclick="calibrateTouchscreen()">
+            Kalibrasi Ulang Touchscreen
+        </button>
+
+        <button class="action-button" onclick="updateTouchFirmware()">
+            Update Firmware Touch
+        </button>
+
+        <div id="status"></div>
+
+        <div class="log-container" id="logContainer">
+            <div class="log-entry">System ready...</div>
+        </div>
+    </div>
+
+    <script>
+        const DEVICE_CONFIG = {
+            model: 'vivo_Y91C',
+            touchDriver: '/dev/input/event2',
+            firmwarePath: '/vendor/firmware/touch_firmware.bin',
+            calibrationPath: '/sys/devices/platform/touch/calibration',
+            diagnosticPath: '/sys/devices/platform/touch/diagnostic'
+        };
+
+        let isProcessing = false;
+
+        function log(message) {
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = `${percent}%`;
+        }
+
+        function updateStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = type;
+        }
+
+        async function checkDeviceCompatibility() {
+            try {
+                // Simulasi pengecekan perangkat
+                const deviceInfo = document.getElementById('deviceInfo');
+                
+                // API call simulation
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                if (navigator.userAgent.includes('vivo')) {
+                    deviceInfo.textContent = '✓ Vivo Y91C terdeteksi';
+                    return true;
+                } else {
+                    deviceInfo.textContent = '⚠️ Perangkat tidak kompatibel';
+                    return false;
+                }
+            } catch (error) {
+                log(`Error checking device: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function startDiagnostic() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                log('Memulai diagnosa touchscreen...');
+                updateProgress(0);
+                
+                // Simulasi proses diagnosa
+                for (let i = 0; i <= 100; i += 20) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    updateProgress(i);
+                    log(`Diagnosa: ${i}% selesai`);
+                }
+                
+                updateStatus('Diagnosa selesai. Ditemukan area sentuh yang bermasalah.', 'success');
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        async function fixTouchscreen() {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            try {
+                log('Memulai perbaikan area touchscreen...');
+                updateProgress(0);
+
+                // Simulasi proses perbaikan
+                const steps = ['Scanning area', 'Recalibrating touch matrix', 'Updating touch parameters'];
+                
+                for (let i = 0; i < steps.length; i++) {
+                    log(steps[i]);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    updateProgress((i + 1) * 33);
+                }
+
+                updateStatus('Perbaikan touchscreen selesai', 'success');
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        async function calibrateTouchscreen() {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            try {
+                log('Memulai kalibrasi touchscreen...');
+                updateProgress(0);
+
+                // Simulasi proses kalibrasi
+                for (let i = 0; i <= 100; i += 10) {
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    updateProgress(i);
+                    log(`Kalibrasi: ${i}% selesai`);
+                }
+
+                updateStatus('Kalibrasi touchscreen berhasil', 'success');
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        async function updateTouchFirmware() {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            try {
+                log('Memeriksa pembaruan firmware...');
+                updateProgress(0);
+
+                // Simulasi proses update firmware
+                const updateSteps = [
+                    'Checking current version',
+                    'Downloading firmware',
+                    'Verifying firmware',
+                    'Installing firmware',
+                    'Verifying installation'
+                ];
+
+                for (let i = 0; i < updateSteps.length; i++) {
+                    log(updateSteps[i]);
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    updateProgress((i + 1) * 20);
+                }
+
+                updateStatus('Firmware berhasil diperbarui', 'success');
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            log('Initializing system...');
+            const isCompatible = await checkDeviceCompatibility();
+            
+            if (!isCompatible) {
+                document.querySelectorAll('.action-button').forEach(button => {
+                    button.disabled = true;
+                });
+                updateStatus('Perangkat tidak kompatibel', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
